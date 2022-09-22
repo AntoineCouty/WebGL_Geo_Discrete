@@ -104,13 +104,14 @@ class plane {
 			1.0,0.0
 		];
 
-
+		//Vertex
 		this.vBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 		this.vBuffer.itemSize = 3;
 		this.vBuffer.numItems = 4;
 
+		//Texture
 		this.tBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.tBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texcoords), gl.STATIC_DRAW);
@@ -174,50 +175,65 @@ class cubeMap{
 	}
 
 	initAll(){
-		var sizeBox = 2.0;
+		var sizeBox = 10.0;
 
 		var cube_pos = [
-			-sizeBox,  sizeBox, -sizeBox,
-    		-sizeBox, -sizeBox, -sizeBox,
-     		sizeBox, -sizeBox, -sizeBox,
-			sizeBox, -sizeBox, -sizeBox,
-			sizeBox,  sizeBox, -sizeBox,
-			-sizeBox,  sizeBox, -sizeBox,
 
-			-sizeBox, -sizeBox,  sizeBox,
-			-sizeBox, -sizeBox, -sizeBox,
-			-sizeBox,  sizeBox, -sizeBox,
-			-sizeBox,  sizeBox, -sizeBox,
-			-sizeBox,  sizeBox,  sizeBox,
-			-sizeBox, -sizeBox,  sizeBox,
+			//back
 
-			sizeBox, -sizeBox, -sizeBox,
-			sizeBox, -sizeBox,  sizeBox,
-			sizeBox,  sizeBox,  sizeBox,
-			sizeBox,  sizeBox,  sizeBox,
-			sizeBox,  sizeBox, -sizeBox,
-			sizeBox, -sizeBox, -sizeBox,
+			-sizeBox, -sizeBox,  -sizeBox,
+			-sizeBox,  sizeBox,  -sizeBox,
+			sizeBox, -sizeBox,  -sizeBox,
+			-sizeBox,  sizeBox,  -sizeBox,
+			sizeBox,  sizeBox,  -sizeBox,
+			sizeBox, -sizeBox,  -sizeBox,
 
-			-sizeBox, -sizeBox,  sizeBox,
-			-sizeBox,  sizeBox,  sizeBox,
-			sizeBox,  sizeBox,  sizeBox,
-			sizeBox,  sizeBox,  sizeBox,
-			sizeBox, -sizeBox,  sizeBox,
-			-sizeBox, -sizeBox,  sizeBox,
+			//left
+			-sizeBox,  -sizeBox, -sizeBox,
+			-sizeBox,  -sizeBox,  sizeBox,
+			-sizeBox,   sizeBox, -sizeBox,
+			-sizeBox,  -sizeBox,  sizeBox,
+			-sizeBox,   sizeBox,  sizeBox,
+			-sizeBox,   sizeBox, -sizeBox,
 
-			-sizeBox,  sizeBox, -sizeBox,
-			sizeBox,  sizeBox, -sizeBox,
-			sizeBox,  sizeBox,  sizeBox,
-			sizeBox,  sizeBox,  sizeBox,
-			-sizeBox,  sizeBox,  sizeBox,
-			-sizeBox,  sizeBox, -sizeBox,
+			//right
+			sizeBox,  -sizeBox, -sizeBox,
+			sizeBox,   sizeBox, -sizeBox,
+			sizeBox,  -sizeBox,  sizeBox,
+			sizeBox,  -sizeBox,  sizeBox,
+			sizeBox,   sizeBox, -sizeBox,
+			sizeBox,   sizeBox,  sizeBox,
 
-			-sizeBox, -sizeBox, -sizeBox,
-			-sizeBox, -sizeBox,  sizeBox,
-			sizeBox, -sizeBox, -sizeBox,
-			sizeBox, -sizeBox, -sizeBox,
-			-sizeBox, -sizeBox,  sizeBox,
-			sizeBox, -sizeBox,  sizeBox
+			//front
+			-sizeBox, -sizeBox,   sizeBox,
+			sizeBox, -sizeBox,   sizeBox,
+		   -sizeBox,  sizeBox,   sizeBox,
+		   -sizeBox,  sizeBox,   sizeBox,
+			sizeBox, -sizeBox,   sizeBox,
+			sizeBox,  sizeBox,   sizeBox,
+
+
+			//top
+			 -sizeBox,   sizeBox, -sizeBox,
+			-sizeBox,   sizeBox,  sizeBox,
+			 sizeBox,   sizeBox, -sizeBox,
+			-sizeBox,   sizeBox,  sizeBox,
+			 sizeBox,   sizeBox,  sizeBox,
+			 sizeBox,   sizeBox, -sizeBox,
+
+			 //bottom
+			
+			-sizeBox,  -sizeBox, -sizeBox,
+			sizeBox,  -sizeBox, -sizeBox,
+		   -sizeBox,  -sizeBox,  sizeBox,
+		   -sizeBox,  -sizeBox,  sizeBox,
+			sizeBox,  -sizeBox, -sizeBox,
+			sizeBox,  -sizeBox,  sizeBox,	
+
+			
+
+		
+			
 		];
 
 		
@@ -227,29 +243,6 @@ class cubeMap{
 		this.vBuffer.itemSize = 3;
 		this.vBuffer.numItems = cube_pos.length/3;
 
-		var texcoords = [
-			0.0,0.0,
-			0.0,1.0,
-			1.0,1.0,
-			1.0,0.0
-		];
-
-		this.tBuffer = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.tBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texcoords), gl.STATIC_DRAW);
-		this.tBuffer.itemSize = 2;
-		this.tBuffer.numItems = 4;
-
-		var indices = [];
-		for(var i=0 ; i<36; i++) {
-			indices.push(i);
-		}
-
-		this.indexBuffer = gl.createBuffer();
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-		this.indexBuffer.itemSize = 1;
-		this.indexBuffer.numItems = indices.length;
 
 		loadShaders(this);
 	}
@@ -262,10 +255,10 @@ class cubeMap{
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vBuffer);
 		gl.vertexAttribPointer(this.shader.vAttrib, this.vBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-		this.shader.tAttrib = gl.getAttribLocation(this.shader, "aTexCoords");
-		gl.enableVertexAttribArray(this.shader.tAttrib);
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.tBuffer);
-		gl.vertexAttribPointer(this.shader.tAttrib,this.tBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+	
+
+		this.shader.uSampler = gl.getUniformLocation(this.shader, "uSampler");
 
 		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
 		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
@@ -279,41 +272,67 @@ class cubeMap{
 	}
 
 	initTexture(){
-		var face = [
-			"right.jpg",
-			"left.jpg",
-			"top.jpg",
-			"bottom.jpg",
-			"front.jpg",
-			"back.jpg"
+		const face = [
+			"skybox/right.jpg",
+			"skybox/left.jpg",
+			"skybox/top.jpg",
+			"skybox/bottom.jpg",
+			"skybox/front.jpg",
+			"skybox/back.jpg"
 		];
 
 
-		var texImage = new Image();
-		texImage.src = face;
+		
+		var texImage = [];
+		var count = 0;
+		for(var i = 0; i < 6; i++){
+			texImage[i] = new Image(face);
+			texImage[i].onload = function () {
+				count++;
+				if(count == 6){
+					var texture = gl.createTexture();
+					gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+					
+					for(var j =0 ; j < 6; j++){			
+						gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X +j , 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texImage[j] );
+						gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+						gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+						gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+						gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+					}
+				}
+			}
+			texImage[i].src = face[i];
+		}	
 
-		var texture = gl.createTexture();
-		texture.image = texImage;
+		// var texImage = new Image();
+		// texImage.src = face[0];
+		// var texture = gl.createTexture(); 
+		// texture.image = texImage;
+		
+		// texImage.onload = function () {
+		// 	for(var i =0 ; i < 6; i++){
+				
 
-		texImage.onload = function () {
-			gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
-			for (var i = 0; i < 6; i++)
-				gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture[i]);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-			gl.uniform1i( this.shader.uSampler, 0);
-			gl.activeTexture(gl.TEXTURE0);
-		}
+		// 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+		// 		gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X +i , 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image );
+		// 		gl.activeTexture(gl.TEXTURE0);
+
+		// 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		// 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		// 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		// 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		// 	}		
+		// }
+
+		
 	}	
 
 	draw() {
 		if(this.shader && this.loaded==4) {		
 			this.setShadersParams();
-			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-			gl.drawElements(gl.TRIANGLES, this.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+
+			gl.drawArrays(gl.TRIANGLES, 0, this.vBuffer.numItems);
 			
 		}
 	}
@@ -338,8 +357,8 @@ function initGL(canvas)
 
 		gl.clearColor(0.7, 0.7, 0.7, 1.0);
 		gl.enable(gl.DEPTH_TEST);
-		gl.enable(gl.CULL_FACE);
-		gl.cullFace(gl.BACK); 
+		//gl.enable(gl.CULL_FACE);
+		//gl.cullFace(gl.BACK); 
 	} catch (e) {}
 	if (!gl) {
 		console.log("Could not initialise WebGL");
@@ -429,6 +448,7 @@ function compileShaders(Obj3D)
 // =====================================================
 function webGLStart() {
 	
+	
 	var canvas = document.getElementById("WebGL-test");
 
 	canvas.onmousedown = handleMouseDown;
@@ -456,8 +476,7 @@ function webGLStart() {
 
 // =====================================================
 function drawScene() {
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER);
-
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	PLANE.draw();
 	//OBJ1.draw();
 	OBJ2.draw();
