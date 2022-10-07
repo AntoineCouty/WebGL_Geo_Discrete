@@ -6,345 +6,62 @@ var gl;
 var mvMatrix = mat4.create();
 var pMatrix = mat4.create();
 var rotMatrix = mat4.create();
+var nMatrix = mat4.create();
+var invMvMatrix = mat4.create();
+
 var distCENTER;
 // =====================================================
 
-var OBJ1 = null;
-var OBJ2 = null;
+var BUNNY = null;
+var PORSHE = null;
 var PLANE = null;
+var SPHERE = null;
+var CUBEMAP = null;
 var CUBE = null;
-// =====================================================
-// OBJET 3D, lecture fichier obj
-// =====================================================
 
-class objmesh {
-
-	// --------------------------------------------
-	constructor(objFname) {
-		this.objName = objFname;
-		this.shaderName = 'obj';
-		this.loaded = -1;
-		this.shader = null;
-		this.mesh = null;
-		
-		loadObjFile(this);
-		loadShaders(this);
-	}
-
-	// --------------------------------------------
-	setShadersParams() {
-		gl.useProgram(this.shader);
-
-		this.shader.vAttrib = gl.getAttribLocation(this.shader, "aVertexPosition");
-		gl.enableVertexAttribArray(this.shader.vAttrib);
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.vertexBuffer);
-		gl.vertexAttribPointer(this.shader.vAttrib, this.mesh.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-		this.shader.nAttrib = gl.getAttribLocation(this.shader, "aVertexNormal");
-		gl.enableVertexAttribArray(this.shader.nAttrib);
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.normalBuffer);
-		gl.vertexAttribPointer(this.shader.nAttrib, this.mesh.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-		this.shader.rMatrixUniform = gl.getUniformLocation(this.shader, "uRMatrix");
-		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
-		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
-	}
-	
-	// --------------------------------------------
-	setMatrixUniforms() {
-		mat4.identity(mvMatrix);
-		mat4.translate(mvMatrix, distCENTER);
-		mat4.multiply(mvMatrix, rotMatrix);
-		gl.uniformMatrix4fv(this.shader.rMatrixUniform, false, rotMatrix);
-		gl.uniformMatrix4fv(this.shader.mvMatrixUniform, false, mvMatrix);
-		gl.uniformMatrix4fv(this.shader.pMatrixUniform, false, pMatrix);
-	}
-	
-	// --------------------------------------------
-	draw() {
-		if(this.shader && this.loaded==4 && this.mesh != null) {
-			this.setShadersParams();
-			this.setMatrixUniforms();
-			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.indexBuffer);
-			gl.drawElements(gl.TRIANGLES, this.mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-		}
-	}
-}
-
-
-
-// =====================================================
-// PLAN 3D, Support géométrique
-// =====================================================
-
-class plane {
-	
-	// --------------------------------------------
-	constructor() {
-		this.shaderName='plane';
-		this.loaded=-1;
-		this.shader=null;
-		this.initAll();
-	}
-		
-	// --------------------------------------------
-	initAll() {
-		var size=1.0;
-		var vertices = [
-			-size, -size, 0.0,
-			 size, -size, 0.0,
-			 size, size, 0.0,
-			-size, size, 0.0
-		];
-
-		var texcoords = [
-			0.0,0.0,
-			0.0,1.0,
-			1.0,1.0,
-			1.0,0.0
-		];
-
-		//Vertex
-		this.vBuffer = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.vBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-		this.vBuffer.itemSize = 3;
-		this.vBuffer.numItems = 4;
-
-		//Texture
-		this.tBuffer = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.tBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texcoords), gl.STATIC_DRAW);
-		this.tBuffer.itemSize = 2;
-		this.tBuffer.numItems = 4;
-
-		loadShaders(this);
-	}
-	
-	
-	// --------------------------------------------
-	setShadersParams() {
-		gl.useProgram(this.shader);
-
-		this.shader.vAttrib = gl.getAttribLocation(this.shader, "aVertexPosition");
-		gl.enableVertexAttribArray(this.shader.vAttrib);
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.vBuffer);
-		gl.vertexAttribPointer(this.shader.vAttrib, this.vBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-		this.shader.tAttrib = gl.getAttribLocation(this.shader, "aTexCoords");
-		gl.enableVertexAttribArray(this.shader.tAttrib);
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.tBuffer);
-		gl.vertexAttribPointer(this.shader.tAttrib,this.tBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
-		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
-
-		mat4.identity(mvMatrix);
-		mat4.translate(mvMatrix, distCENTER);
-		mat4.multiply(mvMatrix, rotMatrix);
-
-		gl.uniformMatrix4fv(this.shader.pMatrixUniform, false, pMatrix);
-		gl.uniformMatrix4fv(this.shader.mvMatrixUniform, false, mvMatrix);
-	}
-
-	// --------------------------------------------
-	draw() {
-		if(this.shader && this.loaded==4) {		
-			this.setShadersParams();
-			
-			gl.drawArrays(gl.TRIANGLE_FAN, 0, this.vBuffer.numItems);
-			gl.drawArrays(gl.LINE_LOOP, 0, this.vBuffer.numItems);
-		}
-	}
-
-}
-
-
-// =====================================================
-// Class cube map 
-// =====================================================
-
-class cubeMap{
-
-	constructor(){
-		this.shaderName='cube_map';
-		this.loaded=-1;
-		this.shader=null;
-		this.initAll();
-		this.initTexture();
-	}
-
-	initAll(){
-		var sizeBox = 10.0;
-
-		var cube_pos = [
-
-			//back
-
-			-sizeBox, -sizeBox,  -sizeBox,
-			-sizeBox,  sizeBox,  -sizeBox,
-			sizeBox, -sizeBox,  -sizeBox,
-			-sizeBox,  sizeBox,  -sizeBox,
-			sizeBox,  sizeBox,  -sizeBox,
-			sizeBox, -sizeBox,  -sizeBox,
-
-			//left
-			-sizeBox,  -sizeBox, -sizeBox,
-			-sizeBox,  -sizeBox,  sizeBox,
-			-sizeBox,   sizeBox, -sizeBox,
-			-sizeBox,  -sizeBox,  sizeBox,
-			-sizeBox,   sizeBox,  sizeBox,
-			-sizeBox,   sizeBox, -sizeBox,
-
-			//right
-			sizeBox,  -sizeBox, -sizeBox,
-			sizeBox,   sizeBox, -sizeBox,
-			sizeBox,  -sizeBox,  sizeBox,
-			sizeBox,  -sizeBox,  sizeBox,
-			sizeBox,   sizeBox, -sizeBox,
-			sizeBox,   sizeBox,  sizeBox,
-
-			//front
-			-sizeBox, -sizeBox,   sizeBox,
-			sizeBox, -sizeBox,   sizeBox,
-		   -sizeBox,  sizeBox,   sizeBox,
-		   -sizeBox,  sizeBox,   sizeBox,
-			sizeBox, -sizeBox,   sizeBox,
-			sizeBox,  sizeBox,   sizeBox,
-
-
-			//top
-			 -sizeBox,   sizeBox, -sizeBox,
-			-sizeBox,   sizeBox,  sizeBox,
-			 sizeBox,   sizeBox, -sizeBox,
-			-sizeBox,   sizeBox,  sizeBox,
-			 sizeBox,   sizeBox,  sizeBox,
-			 sizeBox,   sizeBox, -sizeBox,
-
-			 //bottom
-			
-			-sizeBox,  -sizeBox, -sizeBox,
-			sizeBox,  -sizeBox, -sizeBox,
-		   -sizeBox,  -sizeBox,  sizeBox,
-		   -sizeBox,  -sizeBox,  sizeBox,
-			sizeBox,  -sizeBox, -sizeBox,
-			sizeBox,  -sizeBox,  sizeBox,	
-
-			
-
-		
-			
-		];
-
-		
-		this.vBuffer = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.vBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cube_pos), gl.STATIC_DRAW);
-		this.vBuffer.itemSize = 3;
-		this.vBuffer.numItems = cube_pos.length/3;
-
-
-		loadShaders(this);
-	}
-
-	setShadersParams() {
-		gl.useProgram(this.shader);
-
-		this.shader.vAttrib = gl.getAttribLocation(this.shader, "aVertexPosition");
-		gl.enableVertexAttribArray(this.shader.vAttrib);
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.vBuffer);
-		gl.vertexAttribPointer(this.shader.vAttrib, this.vBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-
-	
-
-		this.shader.uSampler = gl.getUniformLocation(this.shader, "uSampler");
-
-		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
-		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
-
-		mat4.identity(mvMatrix);
-		mat4.translate(mvMatrix, distCENTER);
-		mat4.multiply(mvMatrix, rotMatrix);
-
-		gl.uniformMatrix4fv(this.shader.pMatrixUniform, false, pMatrix);
-		gl.uniformMatrix4fv(this.shader.mvMatrixUniform, false, mvMatrix);
-	}
-
-	initTexture(){
-		const face = [
-			"skybox/right.jpg",
-			"skybox/left.jpg",
-			"skybox/top.jpg",
-			"skybox/bottom.jpg",
-			"skybox/front.jpg",
-			"skybox/back.jpg"
-		];
-
-
-		
-		var texImage = [];
-		var count = 0;
-		for(var i = 0; i < 6; i++){
-			texImage[i] = new Image(face);
-			texImage[i].onload = function () {
-				count++;
-				if(count == 6){
-					var texture = gl.createTexture();
-					gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
-					
-					for(var j =0 ; j < 6; j++){			
-						gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X +j , 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texImage[j] );
-						gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-						gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-						gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-						gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-					}
-				}
-			}
-			texImage[i].src = face[i];
-		}	
-
-		// var texImage = new Image();
-		// texImage.src = face[0];
-		// var texture = gl.createTexture(); 
-		// texture.image = texImage;
-		
-		// texImage.onload = function () {
-		// 	for(var i =0 ; i < 6; i++){
-				
-
-		// 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
-		// 		gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X +i , 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image );
-		// 		gl.activeTexture(gl.TEXTURE0);
-
-		// 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-		// 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-		// 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-		// 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		// 	}		
-		// }
-
-		
-	}	
-
-	draw() {
-		if(this.shader && this.loaded==4) {		
-			this.setShadersParams();
-
-			gl.drawArrays(gl.TRIANGLES, 0, this.vBuffer.numItems);
-			
-		}
-	}
-}
-
+//======================================================
+var objet_gui
+var shader_gui
+var cubeMap_gui
 
 
 // =====================================================
 // FONCTIONS GENERALES, INITIALISATIONS
 // =====================================================
 
+function initTexture(folder){
+	const face = [
+		"cubeMap/" + folder + "/right.jpg",
+		"cubeMap/" + folder + "/left.jpg",
+		"cubeMap/" + folder + "/top.jpg",
+		"cubeMap/" + folder + "/bottom.jpg",
+		"cubeMap/" + folder + "/front.jpg",//top
+		"cubeMap/" + folder + "/back.jpg"
+	];
 
+
+	
+	var texImage = [];
+	var count = 0;
+	for(var i = 0; i < 6; i++){
+		texImage[i] = new Image();
+		texImage[i].onload = function () {
+			count++;
+			if(count == 6){
+				var texture = gl.createTexture();
+				gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+				for(var j =0 ; j < 6; j++){			
+					gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X +j , 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texImage[j] );
+				}
+				gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+				gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+				gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+				gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);			
+			}
+		}
+		texImage[i].src = face[i];
+	}	
+}	
 
 // =====================================================
 function initGL(canvas)
@@ -411,7 +128,7 @@ function loadShaderText(Obj3D,ext) {   // lecture asynchrone...
   }
   
   Obj3D.loaded = 0;
-  xhttp.open("GET", Obj3D.shaderName+ext, true);
+  xhttp.open("GET", "shader/"+Obj3D.shaderName+ext, true);
   xhttp.send();
 }
 
@@ -457,7 +174,8 @@ function webGLStart() {
 	canvas.onwheel = handleMouseWheel;
 
 	initGL(canvas);
-	//initTexture();
+	initUi();
+	initTexture("ville");
 
 	mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
 	mat4.identity(rotMatrix);
@@ -466,10 +184,12 @@ function webGLStart() {
 
 	distCENTER = vec3.create([0,-0.2,-3]);
 	
-	CUBE = new cubeMap();
+	CUBEMAP = new cubeMap('cube_map', 50);
 	PLANE = new plane();
-	//OBJ1 = new objmesh('bunny.obj');
-	OBJ2 = new objmesh('porsche.obj');
+	BUNNY = new objmesh('obj/bunny.obj');
+	PORSHE = new objmesh('obj/porsche.obj');
+	SPHERE = new objmesh('obj/Icosphere.obj');
+	CUBE = new objmesh('obj/untitled.obj');
 	
 	tick();
 }
@@ -477,11 +197,14 @@ function webGLStart() {
 // =====================================================
 function drawScene() {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-	PLANE.draw();
+	//PLANE.draw();
 	//OBJ1.draw();
-	OBJ2.draw();
-	CUBE.draw();
+	//CUBE.draw();
+	CUBEMAP.draw();
+	updateUI();
 }
+
+
 
 
 
