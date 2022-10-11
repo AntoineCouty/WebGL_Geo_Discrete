@@ -5,33 +5,48 @@ precision mediump float;
 
 varying vec3 pos3D;
 varying vec3 N;
-varying mat4 MVMatrix;
 
-uniform vec3 camPos;
+uniform vec3 lightPosition;
+uniform vec3 camera;
+uniform float metalness;
 uniform float sigma;
+
 
 float dFunc( vec3 normal, vec3 h )
 {
     float alpha = sigma;
-	float alpha2 = _alpha * _alpha;
-	return alpha2 / ( PI * pow( pow( dot( normal, h ), 2 ) * ( alpha2 - 1.f ) + 1.f, 2 ) );
+	float alpha2 = alpha * alpha;
+	return alpha2 / ( PI * pow( pow( dot( normal, h ), 2.0 ) * ( alpha2 - 1.0 ) + 1.0, 2.0 ) );
 }
 
 float gFunc( float x ) { 
-	float k = ( ( sigma + 1 ) * ( sigma + 1 ) ) / 8.f;
-	return x / ( x * ( 1.f - k ) + k ); 
+	float k = ( ( sigma + 1.0 ) * ( sigma + 1.0 ) ) / 8.0;
+	return x / ( x * ( 1.0 - k ) + k ); 
 }
 
-vec3 fFunc( const vec3 wO, vec3 h) const {
-	return _F0 + ( 1.f - _F0 ) * pow( 1.f - dot( h, wO ), 5.f );
+vec3 fFunc( vec3 wO, vec3 h)  {
+	vec3 F0 = vec3(0.8,0.4,0.4);
+	return F0 + ( 1.0 - F0 ) * pow( 1.0 - max(dot( h, wO ), 0.0), 5.0 );
 }
 
 void main(void){
-    vec3 wO =  pos3D;
-	vec3 wI = wi ;
-	vec3 normal = N;
+
+
+    vec3 pos =  -pos3D;
+	vec3 light = -pos3D;
+	vec3 wO = normalize(pos );
+	vec3 wI = normalize(light);
+	vec3 normal = normalize(N);
 	vec3 h = normalize(wO + wI) ;
-			
+	
+	// if(dot(normal, wO) > 0.0){
+	// 	normal = -normal;
+	// }
+	float lightPower = 10.0;
+	float dist    = length(wI);
+    float attenuation = 1.0 / (dist * dist);
+    vec3 radiance     = vec3(1.0,1.0,1.0) * attenuation * lightPower ;
+
 	float G1wO = dot( normal, wO );
 	float G1wI = dot( normal, wI );
 
@@ -39,8 +54,13 @@ void main(void){
 			
 	float G = gFunc( G1wO ) * gFunc( G1wI );
 			
-	 vec3 F = fFunc( wO, h );
-	
-	gl_FragColor = vec4(( D * F * G ) / ( 4.f * G1wO * G1wI ), 1.0);
-}
+	vec3 F = fFunc( wO, h );
 
+	vec3 kd = vec3(0.8,0.4,0.4) * dot(N,normalize(vec3(wO))); // Lambert rendering, eye light source
+	vec3 ks = vec3(( D * F * G ) / ( 4.0 * G1wO * G1wI ));
+
+
+	vec3 color = vec3((1.0 - metalness) * kd + metalness * ks) * radiance *  max(dot(normal, wI), 0.0);
+
+	gl_FragColor = vec4(color, 1.0);
+}

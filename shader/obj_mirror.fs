@@ -6,7 +6,6 @@ precision mediump float;
 varying vec3 pos3D;
 varying vec3 N;
 
-uniform vec3 camPos;
 uniform mat4 invViewMat;
 uniform samplerCube skyBox;
 

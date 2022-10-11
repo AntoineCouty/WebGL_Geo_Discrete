@@ -42,6 +42,38 @@ class objmesh {
 		gl.activeTexture(gl.TEXTURE0);
 		gl.uniform1i(this.shader.texSampler, 0);
 	}
+
+	setShadersPbrParams(){
+
+		gl.useProgram(this.shader);
+
+		this.shader.vAttrib = gl.getAttribLocation(this.shader, "aVertexPosition");
+		gl.enableVertexAttribArray(this.shader.vAttrib);
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.vertexBuffer);
+		gl.vertexAttribPointer(this.shader.vAttrib, this.mesh.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		this.shader.nAttrib = gl.getAttribLocation(this.shader, "aVertexNormal");
+		gl.enableVertexAttribArray(this.shader.nAttrib);
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.normalBuffer);
+		gl.vertexAttribPointer(this.shader.nAttrib, this.mesh.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		this.shader.rMatrixUniform = gl.getUniformLocation(this.shader, "uRMatrix");
+		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
+		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
+		this.shader.nMatrixUniform = gl.getUniformLocation(this.shader, "uNMatrix");
+
+		this.shader.lightUniform = gl.getUniformLocation(this.shader, "lightPosition");
+		this.shader.camUniform = gl.getUniformLocation(this.shader, "camera");
+		this.shader.sigmaUniform = gl.getUniformLocation(this.shader, "sigma");
+		this.shader.metalUniform = gl.getUniformLocation(this.shader, "metalness");
+
+
+		gl.uniform3fv(this.shader.lightUniform, lightPos);
+		gl.uniform3fv(this.shader.camUniform, distCENTER);
+		gl.uniform1f(this.shader.sigmaUniform, sigma);
+		gl.uniform1f(this.shader.metalUniform, metalness);
+
+	}
 	
 	// --------------------------------------------
 	setMatrixUniforms() {
@@ -55,7 +87,6 @@ class objmesh {
         mat4.transpose(mat4.inverse(nMatrix));
 		mat4.inverse(invMvMatrix);
 
-        //alert(invMvMatrix[0][0]);
 		gl.uniformMatrix4fv(this.shader.rMatrixUniform, false, rotMatrix);
 		gl.uniformMatrix4fv(this.shader.mvMatrixUniform, false, mvMatrix);
 		gl.uniformMatrix4fv(this.shader.pMatrixUniform, false, pMatrix);
@@ -67,7 +98,11 @@ class objmesh {
 	draw() {
 		if(this.shader && this.loaded==4 && this.mesh != null) {
 			updateShader(this);
-			this.setShadersParams();
+			if(shader_gui.cookTorrence){
+				this.setShadersPbrParams();
+			}else{
+				this.setShadersParams();
+			}
 			this.setMatrixUniforms();
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.indexBuffer);
 			gl.drawElements(gl.TRIANGLES, this.mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);

@@ -1,3 +1,4 @@
+var tmp = null;
 function initUi()
 {
 	const gui = new dat.GUI();
@@ -38,7 +39,7 @@ function initUi()
 
 	cubeMap_gui=
 	{
-		sky: false,
+		sky: true,
 		city: false,
 		snow: false,
 	};
@@ -122,33 +123,45 @@ function updateShader(obj){
 		{
 			obj.shaderName = "obj_lambert"
 			shader_gui.mirror=false;
-			shader_gui.lambert=false;
 			shader_gui.transparent=false;
 			shader_gui.cookTorrence=false;
-			loadShaders(obj);
+			if(tmp != "lambert"){
+				loadShaders(obj);
+			}
+			tmp = "lambert"
 		}
 
 		if( shader_gui.mirror){
 			obj.shaderName = "obj_mirror"
-			shader_gui.mirror=false;
 			shader_gui.lambert=false;
 			shader_gui.transparent=false;
 			shader_gui.cookTorrence=false;
-			loadShaders(obj);
+			if(tmp != "mirror"){
+				loadShaders(obj);
+			}
+			tmp = "mirror"
 		}
 
 		if( shader_gui.transparent){
 			obj.shaderName = "obj_transparent"
 			shader_gui.mirror=false;
 			shader_gui.lambert=false;
-			shader_gui.transparent=false;
 			shader_gui.cookTorrence=false;
-			loadShaders(obj);
+			if(tmp != "transparent"){
+				loadShaders(obj);
+			}
+			tmp = "transparent"
 		}
 
 		if( shader_gui.cookTorrence){
+			
+			obj.shaderName = "cook_t"
 			shader_gui.lambert=false;
 			shader_gui.transparent=false;
 			shader_gui.mirror=false;
+			if(tmp != "cook"){
+				loadShaders(obj);
+			}
+			tmp = "cook";
 		}
 }

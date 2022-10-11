@@ -9,6 +9,10 @@ var rotMatrix = mat4.create();
 var nMatrix = mat4.create();
 var invMvMatrix = mat4.create();
 
+var lightPos = vec3.create([0.0, 3.0, 0.0]);
+var sigma = 0.3;
+var metalness = 0.9;
+
 var distCENTER;
 // =====================================================
 
@@ -175,7 +179,7 @@ function webGLStart() {
 
 	initGL(canvas);
 	initUi();
-	initTexture("ville");
+	initTexture("skybox");
 
 	mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
 	mat4.identity(rotMatrix);
