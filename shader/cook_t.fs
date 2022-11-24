@@ -7,7 +7,7 @@ precision mediump float;
 varying vec3 pos3D;
 varying vec3 N;
 
-uniform float metalness;
+uniform float u_n;
 uniform float sigma;
 uniform float time;
 uniform vec3 uKd;
@@ -39,7 +39,7 @@ float dFunc( vec3 normal, vec3 h )
 	float tan2 = sin2 / cos2;
 	float cos4 = cos2 * cos2;
 
-	return alpha /( PI * cos4 * ((alpha+tan2) * (alpha+tan2))) ;
+	return (1.0 / (PI * (alpha) * cos4)) * (exp((-tan2)/(2.0*(alpha))));
 }
 
 //Attenuation
@@ -121,8 +121,8 @@ void main(void){
 
 	float e1 = random(pos3D.xy*time);
 	float e2 = random(pos3D.yz*time);
-	vec2 st = vec2(e1, e2);
 	vec3 ad = uKd;
+	float ESPILON = 0.001;
 
 	for(float i =0.0; i < NB_RAY; i++){
 		e1 = random(vec2(e1, i));
@@ -140,7 +140,7 @@ void main(void){
 			
 		float G = gFuncGGX(dns, dno, dso, dnref, dsref);
 			
-		float F = getFresnelCoefficient( 1.0, 1.0, sample, normal, ref);
+		float F = getFresnelCoefficient( u_n, 1.0, sample, normal, ref);
 
 		vec3 kd = ad/PI; // Lambert rendering, eye light source
 		vec3 ks =vec3(( D * F * G ) / ( 4.0 * dno * dnref ));
@@ -149,9 +149,19 @@ void main(void){
 		vec3 ModelSample = vec3(invViewMat * vec4(ref, 0.0));
 		vec3 tex = vec3(textureCube(skyBox, RotX(ModelSample)));
 
-		color += tex * vec3((1.0 - F) * kd + ks) * abs(dnref);
+		//critcal angle
+		if(dnref*dno < ESPILON || dsref*dso < ESPILON || dno < ESPILON){
+			color += vec3(0.0);	
+		}
+		//cook-torrance BRDF
+		else{
+			color += tex * vec3((1.0 - F) * kd + ks) * dnref;
+		}
+		//ambiant light
+		color += kd;
 	}
 	
+	//lerp
 	color = color / float(NB_RAY);
 
 	gl_FragColor = vec4(color, 1.0);

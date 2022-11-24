@@ -66,7 +66,7 @@ class objmesh {
 		this.shader.nMatrixUniform = gl.getUniformLocation(this.shader, "uNMatrix");
 
 		this.shader.sigmaUniform = gl.getUniformLocation(this.shader, "sigma");
-		this.shader.metalUniform = gl.getUniformLocation(this.shader, "metalness");
+		this.shader.nIorUniform = gl.getUniformLocation(this.shader, "u_n");
 		this.shader.kdUniform = gl.getUniformLocation(this.shader, "uKd");
 		this.shader.timeUniform = gl.getUniformLocation(this.shader, "time");
 		
@@ -76,7 +76,7 @@ class objmesh {
 		
 		gl.uniform1i(this.shader.texSampler, 0);
 		gl.uniform1f(this.shader.sigmaUniform, sigma);
-		gl.uniform1f(this.shader.metalUniform, metalness);
+		gl.uniform1f(this.shader.nIorUniform, n_ior);
 		gl.uniform3fv(this.shader.kdUniform, kd);
 		gl.uniform1f(this.shader.timeUniform, TIME);
 

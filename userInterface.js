@@ -26,8 +26,8 @@ function initUi()
 	{
 		sphere: false,
 		voiture: false,
-		bunny: false,
-		cube: true,
+		bunny: true,
+		cube: false,
 	};
 	
 	objFolder.add(objet_gui, "sphere").listen().onChange(function(){setChecked("sphere", objet_gui)});
@@ -41,8 +41,8 @@ function initUi()
 	shader_gui=
 	{
 		lambert: false,
-		mirror: true,
-		transparent: false,
+		mirror: false,
+		transparent: true,
 		cookTorrance: false,
 	};
 
@@ -57,8 +57,8 @@ function initUi()
 	//Pour les cubes maps
 	cubeMap_gui=
 	{
-		sky: true,
-		city: false,
+		sky: false,
+		city: true,
 		snow: false,
 	};
 
@@ -70,10 +70,9 @@ function initUi()
 	cubeMapFolder.open();
 
 	//Pour les sliders
-	depart = { Sigma : sigma, Metalness : metalness};	//le step 
+	depart = { Sigma : sigma, N : n_ior};	//le step 
 	sliderFolder.add( depart, 'Sigma', 0.001, 0.3 ).step(0.001);
-	sliderFolder.add( depart, 'Metalness', 0.0, 1.0 ).step(0.1);
-	
+	sliderFolder.add( depart, 'N', 1.0, 3.0 ).step(0.1);
 	
 }
 
@@ -151,11 +150,10 @@ function updateUI(){
 	kd[0] = palette.color[0]/255;
 	kd[1] = palette.color[1]/255;
 	kd[2] = palette.color[2]/255;
-	
-	
+	//console.log(kd);
 	sigma = depart.Sigma;
-	metalness = depart.Metalness;
-
+	n_ior = depart.N;
+	
 }
 
 function updateShader(){

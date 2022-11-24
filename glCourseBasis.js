@@ -27,11 +27,11 @@ var cubeMap_gui
 
 //======================================================
 //default values
-var current_shader = "obj_mirror";
-var current_texture = "skybox";
+var current_shader = "obj_transparent";
+var current_texture = "city";
 var sigma = 0.3;
-var metalness = 0.7;
-var kd = vec3.create([1.0, 1.0, 1.0]);
+var n_ior = 1.0;
+var kd = vec3.create([255.0, 255.0, 255.0]);
 var TIME = 0;
 
 // =====================================================
@@ -198,7 +198,7 @@ function webGLStart() {
 	PLANE = new plane();
 	BUNNY = new objmesh('obj/bunny.obj');
 	PORSHE = new objmesh('obj/porsche.obj');
-	SPHERE = new objmesh('obj/Icosphere.obj');
+	SPHERE = new objmesh('obj/sphere.obj');
 	CUBE = new objmesh('obj/untitled.obj');
 	
 	tick();

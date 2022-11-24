@@ -12,7 +12,7 @@ varying vec3 N;
 void main(void) {
 
 	N = normalize((uNMatrix * vec4(aVertexNormal, 0.0)).xyz );				//Application de la NormalMatrix aux normales
-	pos3D = (uMVMatrix * vec4(aVertexPosition, 1.0)).xyz;;											//Calcul de L0 avec les positions misent dans le View space
+	pos3D = (uMVMatrix * vec4(aVertexPosition, 1.0)).xyz;										//Calcul de L0 avec les positions misent dans le View space
 	gl_Position =  uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 }
 
