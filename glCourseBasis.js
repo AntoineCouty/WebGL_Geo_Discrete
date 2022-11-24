@@ -9,9 +9,6 @@ var rotMatrix = mat4.create();
 var nMatrix = mat4.create();
 var invMvMatrix = mat4.create();
 
-var lightPos = vec3.create([0.0, 3.0, 0.0]);
-var sigma = 0.3;
-var metalness = 0.9;
 
 var distCENTER;
 // =====================================================
@@ -28,6 +25,14 @@ var objet_gui
 var shader_gui
 var cubeMap_gui
 
+//======================================================
+//default values
+var current_shader = "obj_mirror";
+var current_texture = "skybox";
+var sigma = 0.3;
+var metalness = 0.7;
+var kd = vec3.create([1.0, 1.0, 1.0]);
+var TIME = 0;
 
 // =====================================================
 // FONCTIONS GENERALES, INITIALISATIONS
@@ -49,6 +54,7 @@ function initTexture(folder){
 	var count = 0;
 	for(var i = 0; i < 6; i++){
 		texImage[i] = new Image();
+		texImage[i].src = face[i];
 		texImage[i].onload = function () {
 			count++;
 			if(count == 6){
@@ -63,7 +69,7 @@ function initTexture(folder){
 				gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);			
 			}
 		}
-		texImage[i].src = face[i];
+		
 	}	
 }	
 
@@ -200,10 +206,8 @@ function webGLStart() {
 
 // =====================================================
 function drawScene() {
+	TIME++;
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-	//PLANE.draw();
-	//OBJ1.draw();
-	//CUBE.draw();
 	CUBEMAP.draw();
 	updateUI();
 }

@@ -7,12 +7,15 @@ class objmesh {
 	// --------------------------------------------
 	constructor(objFname) {
 		this.objName = objFname;
-		this.shaderName = 'obj_mirror';
+		this.mesh = null;
 		this.loaded = -1;
 		this.shader = null;
-		this.mesh = null;
-
 		loadObjFile(this);
+		this.reload();
+	}
+
+	reload(){
+		this.shaderName = current_shader;
 		loadShaders(this);
 	}
 
@@ -35,8 +38,8 @@ class objmesh {
 		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
 		this.shader.nMatrixUniform = gl.getUniformLocation(this.shader, "uNMatrix");
         this.shader.invMVMatrixUniform = gl.getUniformLocation(this.shader, "invViewMat");
-
-		gl.uniform3fv(this.shader.camLoc,distCENTER);
+		this.shader.kdUniform = gl.getUniformLocation(this.shader, "uKd");
+		gl.uniform3fv(this.shader.kdUniform, kd);
 
 		this.shader.texSampler = gl.getUniformLocation(this.shader, "skyBox");
 		gl.activeTexture(gl.TEXTURE0);
@@ -62,16 +65,20 @@ class objmesh {
 		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
 		this.shader.nMatrixUniform = gl.getUniformLocation(this.shader, "uNMatrix");
 
-		this.shader.lightUniform = gl.getUniformLocation(this.shader, "lightPosition");
-		this.shader.camUniform = gl.getUniformLocation(this.shader, "camera");
 		this.shader.sigmaUniform = gl.getUniformLocation(this.shader, "sigma");
 		this.shader.metalUniform = gl.getUniformLocation(this.shader, "metalness");
-
-
-		gl.uniform3fv(this.shader.lightUniform, lightPos);
-		gl.uniform3fv(this.shader.camUniform, distCENTER);
+		this.shader.kdUniform = gl.getUniformLocation(this.shader, "uKd");
+		this.shader.timeUniform = gl.getUniformLocation(this.shader, "time");
+		
+		this.shader.invMVMatrixUniform = gl.getUniformLocation(this.shader, "invViewMat");
+		this.shader.texSampler = gl.getUniformLocation(this.shader, "skyBox");
+		gl.activeTexture(gl.TEXTURE0);
+		
+		gl.uniform1i(this.shader.texSampler, 0);
 		gl.uniform1f(this.shader.sigmaUniform, sigma);
 		gl.uniform1f(this.shader.metalUniform, metalness);
+		gl.uniform3fv(this.shader.kdUniform, kd);
+		gl.uniform1f(this.shader.timeUniform, TIME);
 
 	}
 	
@@ -97,8 +104,8 @@ class objmesh {
 	// --------------------------------------------
 	draw() {
 		if(this.shader && this.loaded==4 && this.mesh != null) {
-			updateShader(this);
-			if(shader_gui.cookTorrence){
+			updateShader();
+			if(this.shaderName == "cook_t"){
 				this.setShadersPbrParams();
 			}else{
 				this.setShadersParams();
@@ -206,7 +213,7 @@ class plane {
 class cubeMap{
 
 	constructor(shader, sizeBox){
-		this.shaderName= shader;
+		this.shaderName= "cube_map";
 		this.loaded=-1;
 		this.shader=null;
 		this.size = sizeBox;
