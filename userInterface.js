@@ -1,3 +1,4 @@
+//PONS Yuri MORIN Claire COUTY Antoine
 var depart; 
 var palette;
 function initUi()

@@ -1,3 +1,4 @@
+//PONS Yuri MORIN Claire COUTY Antoine
 #define PI 3.1415926538
 precision mediump float;
 

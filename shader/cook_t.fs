@@ -1,3 +1,4 @@
+//PONS Yuri MORIN Claire COUTY Antoine
 #define PI 3.1415926538
 #define NB_RAY 10.0
 precision mediump float;
@@ -44,18 +45,12 @@ float dFunc( vec3 normal, vec3 h )
 
 //Attenuation
 
-float gFuncGGX( float dns, float dno, float dso, float dnref, float dsref){
+float gFunc( float dns, float dno, float dso, float dnref, float dsref){
 	return min(min((2.0*dns*dno)/dso, (2.0*dns*dnref) / dsref), 1.0);
 }
 
 
 //Fresnel
-vec3 fFunc( vec3 wO, vec3 h, float ior, vec3 ad)  {
-	vec3 F0 = vec3((1.0-ior) / (1.0+ior));
-	F0 = (F0 + ad)*0.5;
-	float theta = 1.0 - max(dot( h, wO ), 0.0);
-	return F0 + ( 1.0 - F0 ) * theta*theta*theta*theta*theta;
-}
 
 float getFresnelCoefficient( float n1, float n2, vec3 wi, vec3 normal, vec3 refract_dir) 
 {
@@ -126,7 +121,7 @@ void main(void){
 
 	for(float i =0.0; i < NB_RAY; i++){
 		e1 = random(vec2(e1, i));
-		e2 = random(vec2(e2, i*0.8));
+		e2 = random(vec2(e2, i*0.4));
 		vec3 sample = ImportanceSample(vec2(e1, e2), normal);
 		vec3 ref = reflect(-wO, sample);
 
@@ -138,7 +133,7 @@ void main(void){
 
 		float D = dFunc( normal, ref );
 			
-		float G = gFuncGGX(dns, dno, dso, dnref, dsref);
+		float G = gFunc(dns, dno, dso, dnref, dsref);
 			
 		float F = getFresnelCoefficient( u_n, 1.0, sample, normal, ref);
 
